@@ -31,6 +31,7 @@ def sign_in():
 		print "test3"
 		return render_template("client.html", token=token)
 
+@app.route('/sigup')
 def sign_up(email, password, firstname, familyname, gender, city, country):
 	if request.method == 'POST':
 		if database_helper.get_user_info_email(email) != None:
@@ -44,10 +45,12 @@ def sign_up(email, password, firstname, familyname, gender, city, country):
 		else : jsonfile = json.dumps({"success": False, "Message": "Already use email"})
 		return jsonfile
 
+@app.route('/sigout/<token>')
 def sign_out(token):
 	if request.method == 'POST':
 		database.sign_out(token);
 
+@app.route('/passchange/<token>/<old_password>/<new_password>')
 def change_password(token, old_password, new_password):
 	if request.method == 'POST':
 		m = hashlib.md5()
@@ -57,6 +60,7 @@ def change_password(token, old_password, new_password):
 		pwd2 = m.hexdigest()
 		database_helper.change_password(token, pwd1, pwd2)
 
+@app.route('/userdatatoken/<token>')
 def get_user_data_by_token(token):
 	res = database_helper.get_user_info(token)
 	if res != None:
@@ -64,6 +68,7 @@ def get_user_data_by_token(token):
 	else : jsonfile = json.dumps({"success": False, "Message": "Token error"})
 	return jsonfile
 
+@app.route('/userdataemail/<token>/<email>')
 def get_user_data_by_email(token, email):
 	if get_user_data_by_token(token) != None:
 		res = database_helper.get_user_info_email(email)
@@ -73,6 +78,7 @@ def get_user_data_by_email(token, email):
 	else : jsonfile = json.dumps({"success": False, "Message": "Token error"})
 	return jsonfile
 
+@app.route('/messages/<token>')
 def get_user_messages_by_token(token):
 	messages = database_helper.get_user_messages(token)
 	if messages != None:
@@ -80,14 +86,17 @@ def get_user_messages_by_token(token):
 	else : jsonfile = json.dumps({"success": False, "Message": "no messages"})
 	return jsonfile
 
+@app.route('/messages/<token>/<email>')
 def get_user_messages_by_email(token, email):
 	if get_user_data_by_token(token) != None:
+		messages = database_helper.get_user_messages_email(email)
 		if messages != None:
 			jsonfile = json.dumps({"success": True, "Message": "messages found", "Data": messages})
 		else : jsonfile = json.dumps({"success": False, "Message": "no messages"})
 	else : jsonfile = json.dumps({"success": False, "Message": "token error"})
 	return jsonfile
 
+@app.route('/postmessage/<token>')
 def post_message(token, message, email):
 	if get_user_data_by_token(token) != None:
 		database_helper.post_message(token, message, email)
