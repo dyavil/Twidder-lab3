@@ -73,7 +73,7 @@
 			<div id="home">
 			
 				<div id="userinfo"></div>
-				<form onsubmit="postmess();" id="postmess">
+				<form onsubmit="postmess(); return false;" id="postmess">
 					<textarea id="newmess" required="true" rows="4" cols="50"placeholder="message"></textarea>
 					<input type="submit">
 				</form>
@@ -95,14 +95,14 @@
 				</form>
 				<div id='userwallinfo'></div>
 				<div id='wallb'></div>
-				<button class="reload" onclick="reloadwall(1);">Reload</button>
+				<button class="reload" onclick="reloadwall(1); return false;">Reload</button>
 				</div>
 
 			</div>
 
 			<div id="account">
 
-				<form id="cgpass" onsubmit="changepass()";>
+				<form id="cgpass" onsubmit="changepass(); return false;">
 					<input type="password" id="oldpwd" required="true" placeholder="old password">
 					<input type="password" id="newpwd" required="true" placeholder="new password">
 					<input type="submit">

@@ -51,11 +51,15 @@ def sign_out(token):
 def change_password(token, old_password, new_password):
 	if request.method == 'POST':
 		m = hashlib.md5()
+		m2 = hashlib.md5()
 		m.update(old_password)
 		pwd1 = m.hexdigest()
-		m.update(new_password)
-		pwd2 = m.hexdigest()
+		m2.update(new_password)
+		pwd2 = m2.hexdigest()
 		database_helper.change_password(token, pwd1, pwd2)
+		jsonfile = json.dumps({"success": True, "Message": "Password changed"})
+		return jsonfile
+
 
 @app.route('/userdatatoken/<token>', methods=['GET'])
 def get_user_data_by_token(token):
@@ -93,7 +97,7 @@ def get_user_messages_by_email(token, email):
 	else : jsonfile = json.dumps({"success": False, "Message": "token error"})
 	return jsonfile
 
-@app.route('/postmessage/<token>')
+@app.route('/postmessage/<token>/<message>/<email>', methods=['POST'])
 def post_message(token, message, email):
 	if get_user_data_by_token(token) != None:
 		database_helper.post_message(token, message, email)

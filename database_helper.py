@@ -119,7 +119,8 @@ def post_message(token, message, email):
 	cursor=c.cursor()
 	cursor.execute("SELECT email FROM users WHERE token = ?", (token, ))
 	useremail = cursor.fetchone()
-	cursor.execute("INSERT INTO messages (writer, content, receiver) VALUES (?, ?, ?)", (useremail, message, email))
+	print useremail
+	cursor.execute("INSERT INTO messages (writer, content, receiver) VALUES (?, ?, ?)", (useremail[0], message, email))
 	c.commit()
 	pass
 

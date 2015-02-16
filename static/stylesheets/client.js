@@ -37,7 +37,7 @@ function signup(){
 
 	
 	xmlhttp = new XMLHttpRequest();
-	window.alert("test");
+	//window.alert("test");
 	var rep;
 	xmlhttp.open("POST", "/signup/" + document.getElementById('email').value + "/" + pass1 + "/" + document.getElementById('firstname').value + "/" + document.getElementById('familyname').value + "/" + document.getElementById('gender').value + "/" + document.getElementById('city').value + "/" + document.getElementById('country').value, false);
 	xmlhttp.onreadystatechange=function()
@@ -45,7 +45,7 @@ function signup(){
 		if (xmlhttp.readyState==4 && xmlhttp.status==200)
 	    {
 	    	rep=JSON.parse(xmlhttp.responseText);
-	    	window.alert("test2");
+	    	//window.alert("test2");
 			displayView();
 			window.alert(rep.Message);
 			}
@@ -67,7 +67,7 @@ function signin(){
 	}
 
 	xmlhttp = new XMLHttpRequest();
-	window.alert("test");
+	//window.alert("test");
 	var rep;
 	xmlhttp.open("POST", "/signin/" + document.getElementById('siemail').value + "/" + pass, false);
 	xmlhttp.onreadystatechange=function()
@@ -75,7 +75,7 @@ function signin(){
 		if (xmlhttp.readyState==4 && xmlhttp.status==200)
 	    {
 	    	rep=JSON.parse(xmlhttp.responseText);
-	    	window.alert("test2");
+	    	//window.alert("test2");
 	    	var token = null;
 			if (rep.success == true){
 			token = rep.data;
@@ -105,7 +105,7 @@ function logout(){
 		if (xmlhttp.readyState==4 && xmlhttp.status==200)
 	    {
 	    	rep=JSON.parse(xmlhttp.responseText);
-	    	window.alert("test2");
+	    	//window.alert("test2");
 			displayView();
 			window.alert(rep.Message);
 			}
@@ -125,12 +125,7 @@ function tabdisplay(id){
 			document.getElementById('browse').style.display ='none';
 			document.getElementById('account').style.display ='none';
 			var tok = JSON.parse(localStorage.getItem("token"));
-			var res = serverstub.getUserDataByToken(tok);
-			var usr = res.data;
-			var usrinf = document.getElementById('userinfo');
-
-			usrinf.innerHTML = "<div>Email : "+usr.email+"</div><b>Firstname : "+usr.firstname+"</b><div>Familyname : "+usr.familyname+"</div><div>Gender : "+usr.gender+"</div><div>City : "+usr.city+"</div><div>Country : "+usr.country+"</div>";
-			
+			userinfo();
 			reloadwall();
 
 			document.getElementById('home').style.display='block';
@@ -170,10 +165,23 @@ function changepass()
 		return false;
 	}
 
-	var res = serverstub.changePassword(tok, oldpass, newpass);
+	xmlhttp = new XMLHttpRequest();
+		var rep;
+		xmlhttp.open("POST", "/passchange/" + tok + "/" + oldpass + "/" + newpass, false);
+		xmlhttp.onreadystatechange=function()
+		{
+			if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		    {
+		    	rep=JSON.parse(xmlhttp.responseText);
+				window.alert(rep.Message);
+			}
+		}
 
-	window.alert(res.message);
+		xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+		xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xmlhttp.send(null);
 
+	return false;
 };
 
 
@@ -182,15 +190,29 @@ function postmess(mail)
 	var tok = JSON.parse(localStorage.getItem("token"));
 	var content = document.getElementById('newmess').value;
 	var res;
+	var email = "himself";
 	if (mail) 
 	{
+		email = JSON.parse(localStorage.getItem("usrmail"));
 		content = document.getElementById('newmessonwall').value;
-		var email = JSON.parse(localStorage.getItem("usrmail"));
-		res = serverstub.postMessage(tok, content, email);
+	}
 
-	} else res = serverstub.postMessage(tok, content, null);
+		xmlhttp = new XMLHttpRequest();
+		var rep;
+		xmlhttp.open("POST", "/postmessage/" + tok + "/" + content + "/" + email, false);
+		xmlhttp.onreadystatechange=function()
+		{
+			if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		    {
+		    	rep=JSON.parse(xmlhttp.responseText);
+				window.alert(rep.Message);
+				if (mail) { reloadwall(1); };
+			}
+		}
 
-	window.alert(res.message);
+		xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+		xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xmlhttp.send(null);
 
 };
 
@@ -198,28 +220,31 @@ function reloadwall(type)
 {
 	var tok = JSON.parse(localStorage.getItem("token"));
 	var messages;
-	window.alert("test1");
 	var wall = document.getElementById('wall');
 	if (type) { 
 		wall=document.getElementById('wallb');
+		var email = JSON.parse(localStorage.getItem("usrmail"));
 		xmlhttp = new XMLHttpRequest();
 		var rep;
-		xmlhttp.open("GET", "/messages/" + token, false);
+		//window.alert(email);
+		xmlhttp.open("GET", "/messages/" + tok + "/" + email, false);
+		//window.alert("test1");
 		xmlhttp.onreadystatechange=function()
 		{
 			if (xmlhttp.readyState==4 && xmlhttp.status==200)
 		    {
 		    	rep=JSON.parse(xmlhttp.responseText);
-		    	window.alert("test2");
-				displayView();
-				messages=rep.data;
+		    	messages = rep.Data;
+				messparse = JSON.parse(messages);
 				var wallcontent ="";
-				for (var m=0; m<messages.length; m++)
+				for (var m=0; m<messparse.length; m++)
 				{
-					wallcontent += "<div><h4>"+messages[m].writer+"</h4><p>"+messages[m].content+"</p></div></br>";
+					wallcontent += "<div><h4>"+messparse[m].writer+"</h4><p>"+messparse[m].content+"</p></div></br>";
 				}
+				//window.alert(messparse.length);
 				wall.innerHTML = wallcontent;	
 				window.alert(rep.Message);
+				userinfo(email);
 				}
 		}
 
@@ -232,22 +257,23 @@ function reloadwall(type)
 	{
 		xmlhttp = new XMLHttpRequest();
 		var rep;
-		xmlhttp.open("GET", "/messages/" + token, false);
+		xmlhttp.open("GET", "/messages/" + tok, false);
 		xmlhttp.onreadystatechange=function()
 		{
 			if (xmlhttp.readyState==4 && xmlhttp.status==200)
 		    {
 		    	rep=JSON.parse(xmlhttp.responseText);
-		    	window.alert("test2");
-				displayView();
-				messages = rep.data;
+				messages = rep.Data;
+				messparse = JSON.parse(messages);
 				var wallcontent ="";
-				for (var m=0; m<messages.length; m++)
+				for (var m=0; m<messparse.length; m++)
 				{
-					wallcontent += "<div><h4>"+messages[m].writer+"</h4><p>"+messages[m].content+"</p></div></br>";
+					wallcontent += "<div><h4>"+messparse[m].writer+"</h4><p>"+messparse[m].content+"</p></div></br>";
 				}
+				//window.alert(messparse.length);
 				wall.innerHTML = wallcontent;
 				window.alert(rep.Message);
+				userinfo();
 				}
 		}
 
@@ -255,7 +281,7 @@ function reloadwall(type)
 		xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		xmlhttp.send(null);
 	}
-	
+	return false;
 };
 
 
@@ -264,27 +290,50 @@ function finduser()
 
 	var tok = JSON.parse(localStorage.getItem("token"));
 	var mail = document.getElementById('usermail').value;
-
+	localStorage.setItem("usrmail", JSON.stringify(mail));
 	document.getElementById('showwall').style.display ='block';
-
-	var messages = serverstub.getUserMessagesByEmail(tok, mail).data;
-	var wallb = document.getElementById('wallb');
-
-	var res = serverstub.getUserDataByEmail(tok, mail);
-			var usr = res.data;
-			var usrinf = document.getElementById('userwallinfo');
-
-			usrinf.innerHTML = "<div>Email : "+usr.email+"</div><b>Firstname : "+usr.firstname+"</b><div>Familyname : "+usr.familyname+"</div><div>Gender : "+usr.gender+"</div><div>City : "+usr.city+"</div><div>Country : "+usr.country+"</div>";
-			
-
-	var wallcontent ="";
-		for (var m=0; m<messages.length; m++)
-		{
-			wallcontent += "<div><h4>"+messages[m].writer+"</h4><p>"+messages[m].content+"</p></div></br>";
-		};
-		wallb.innerHTML = wallcontent;
-		localStorage.setItem("usrmail", JSON.stringify(mail));
-		return false;
+	reloadwall(1);
+	
+	return false;
 };
 
+
+function userinfo(mail)
+{
+	var tok = JSON.parse(localStorage.getItem("token"));
+	var req ="";
+	var usrinf = document.getElementById('userinfo');
+	if (mail) 
+	{
+		req = ("/userdataemail/" + tok + "/" + mail);
+		usrinf = document.getElementById('userwallinfo');
+
+	}
+	else {
+		req = ("/userdatatoken/" + tok);
+	}
+
+	xmlhttp = new XMLHttpRequest();
+		var rep;
+		xmlhttp.open("GET", req, false);
+		xmlhttp.onreadystatechange=function()
+		{
+			if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		    {
+		    	rep=JSON.parse(xmlhttp.responseText);
+		    	userdata = rep.Data;
+				userparse = JSON.parse(userdata);
+
+				usrinf.innerHTML = "<div>Email : "+userparse.email+"</div><b>Firstname : "+userparse.firstname+"</b><div>Familyname : "+userparse.familyname+"</div><div>Gender : "+userparse.gender+"</div><div>City : "+userparse.city+"</div><div>Country : "+userparse.country+"</div>";
+			
+				window.alert(rep.Message);
+			}
+		}
+
+		xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+		xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xmlhttp.send(null);
+
+
+};
 
