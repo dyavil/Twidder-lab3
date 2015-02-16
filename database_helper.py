@@ -29,10 +29,11 @@ def get_user(email, password, token):
 	c.commit()
 	result = [dict(email=row[0], firstname=row[2], familyname=row[3], gender=row[4], city=row[5], country=row[6], token=row[7]) for row in cursor.fetchall()]
 	print result
-	cursor.close()
 	print "trtrtrtrt"
-	if cursor.rowcount <= 0:
+	if cursor.execute("SELECT Count(*) FROM users WHERE email = ? AND password = ?", (email, password)).fetchall()[0] <= 0:
+		cursor.close()
 		return None
+	cursor.close()
 	return json.dumps(result[0])
 
 def get_user_info(token):
@@ -41,7 +42,7 @@ def get_user_info(token):
 	cursor.execute("SELECT * FROM users WHERE token = ?", (token, ))
 	result = [dict(email=row[0], firstname=row[2], familyname=row[3], gender=row[4], city=row[5], country=row[6]) for row in cursor.fetchall()]
 	print result
-	if cursor.rowcount <= 0:
+	if cursor.execute("SELECT Count(*) FROM users WHERE token = ?", (token, )).fetchall()[0] <= 0:
 		cursor.close()
 		return None
 	cursor.close()
@@ -52,7 +53,8 @@ def get_user_info_email(email):
 	cursor = c.cursor()
 	cursor.execute("SELECT * FROM users WHERE email = ?", (email, ))
 	result = [dict(email=row[0], firstname=row[2], familyname=row[3], gender=row[4], city=row[5], country=row[6]) for row in cursor.fetchall()]
-	if cursor.rowcount <= 0:
+	print result
+	if cursor.execute("SELECT Count(*) FROM users WHERE email = ?", (email, )).fetchall()[0] <= 0:
 		cursor.close()
 		return None
 	cursor.close()
@@ -68,7 +70,7 @@ def get_user_messages(token):
 	cursor.execute("SELECT * FROM messages WHERE writer = ? OR receiver = ?", (useremail, useremail))
 	result = [dict(writer=row[1], content=row[2], receiver=row[3]) for row in cursor.fetchall()]
 	print cursor.rowcount
-	if cursor.rowcount <= 0:
+	if cursor.execute("SELECT Count(*) FROM messages WHERE writer = ? OR receiver = ?", (useremail, useremail)).fetchall()[0] <= 0:
 		cursor.close()
 		return None
 	cursor.close()
@@ -79,7 +81,7 @@ def get_user_messages_email(email):
 	cursor=c.cursor()
 	cursor.execute("SELECT * FROM messages WHERE writer = ? OR receiver = ?", (email, email))
 	result = [dict(writer=row[1], content=row[2], receiver=row[3]) for row in cursor.fetchall()]
-	if cursor.rowcount <= 0:
+	if cursor.execute("SELECT Count(*) FROM messages WHERE writer = ? OR receiver = ?", (email, email)).fetchall()[0] <= 0:
 		cursor.close()
 		return None
 	cursor.close()
@@ -91,9 +93,12 @@ def insert_user(email, password, firstname, familyname, gender, city, country, t
 	cursor = c.cursor()
 	cursor.execute("INSERT INTO users (email, password, firstname, familyname, gender, city, country, token) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (email, password, firstname, familyname, gender, city, country, token))
 	result = [dict(email=row[0], firstname=row[2], familyname=row[3], gender=row[4], city=row[5], country=row[6], token=row[7]) for row in cursor.fetchall()]
-	cursor.close()
 	c.commit()
-	return json.dumps(result[0])
+	if cursor.rowcount <= 0:
+		cursor.close()
+		return None
+	cursor.close()
+	return json.dumps({"success" :True})
 
 def sign_out(token):
 	c = get_db()

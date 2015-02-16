@@ -14,27 +14,23 @@ app = Flask(__name__)
 def home():
 	return render_template('client.html')
 
+@app.route('/signin/<email>/<password>', methods=['POST'])
+def sign_in(email, password):
+	token = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40))
+	print password
+	m = hashlib.md5()
+	m.update(password)
+	print m.hexdigest()
+	pwd = m.hexdigest()
+	result = database_helper.get_user(email, pwd, token)
+	jsonfile = json.dumps({"success": True, "Message": "Log in", "data": token})
+	return jsonfile
 
-@app.route('/signin', methods=['POST'])
-def sign_in():
-	if request.method == 'POST':
-		email = request.form["siemail"]
-		print "test"
-		password = request.form["sipassword"]
-		token = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40))
-		print password
-		m = hashlib.md5()
-		m.update(password)
-		print m.hexdigest()
-		pwd = m.hexdigest()
-		result = database_helper.get_user(email, pwd, token)
-		print "test3"
-		return render_template("client.html", token=token)
 
-@app.route('/sigup')
+@app.route('/signup/<email>/<password>/<firstname>/<familyname>/<gender>/<city>/<country>', methods=['POST'])
 def sign_up(email, password, firstname, familyname, gender, city, country):
 	if request.method == 'POST':
-		if database_helper.get_user_info_email(email) != None:
+		if database_helper.get_user_info_email(email) == None:
 			token = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40))
 			m = hashlib.md5()
 			m.update(password)
@@ -45,12 +41,13 @@ def sign_up(email, password, firstname, familyname, gender, city, country):
 		else : jsonfile = json.dumps({"success": False, "Message": "Already use email"})
 		return jsonfile
 
-@app.route('/sigout/<token>')
+@app.route('/signout/<token>', methods=['POST'])
 def sign_out(token):
 	if request.method == 'POST':
-		database.sign_out(token);
+		database_helper.sign_out(token);
+		return json.dumps({"success": True, "Message": "Log out !"})
 
-@app.route('/passchange/<token>/<old_password>/<new_password>')
+@app.route('/passchange/<token>/<old_password>/<new_password>', methods=['POST'])
 def change_password(token, old_password, new_password):
 	if request.method == 'POST':
 		m = hashlib.md5()
@@ -60,7 +57,7 @@ def change_password(token, old_password, new_password):
 		pwd2 = m.hexdigest()
 		database_helper.change_password(token, pwd1, pwd2)
 
-@app.route('/userdatatoken/<token>')
+@app.route('/userdatatoken/<token>', methods=['GET'])
 def get_user_data_by_token(token):
 	res = database_helper.get_user_info(token)
 	if res != None:

@@ -35,16 +35,30 @@ function signup(){
 		return false;
 	}
 
-	var dataform = {email: document.getElementById('email').value, password: document.getElementById('password').value, firstname: document.getElementById('firstname').value, familyname: document.getElementById('familyname').value, gender: document.getElementById('gender').value, city: document.getElementById('city').value, country: document.getElementById('country').value};
+	
+	xmlhttp = new XMLHttpRequest();
+	window.alert("test");
+	var rep;
+	xmlhttp.open("POST", "/signup/" + document.getElementById('email').value + "/" + pass1 + "/" + document.getElementById('firstname').value + "/" + document.getElementById('familyname').value + "/" + document.getElementById('gender').value + "/" + document.getElementById('city').value + "/" + document.getElementById('country').value, false);
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+	    {
+	    	rep=JSON.parse(xmlhttp.responseText);
+	    	window.alert("test2");
+			displayView();
+			window.alert(rep.Message);
+			}
+	}
 
-	var res = serverstub.signUp(dataform);
-
-	window.alert(res.message);
+	xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+	xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xmlhttp.send(null);
 
 
 };
 
-function signin(json){
+function signin(){
 	var pass = document.getElementById('sipassword').value;
 
 	if (pass.length < 8){
@@ -52,25 +66,54 @@ function signin(json){
 		return false;
 	}
 
-	var res = serverstub.signIn(document.getElementById('siemail').value, pass);
-	var token = null;
-	if (res.success == true){
-	token = res.data;
+	xmlhttp = new XMLHttpRequest();
+	window.alert("test");
+	var rep;
+	xmlhttp.open("POST", "/signin/" + document.getElementById('siemail').value + "/" + pass, false);
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+	    {
+	    	rep=JSON.parse(xmlhttp.responseText);
+	    	window.alert("test2");
+	    	var token = null;
+			if (rep.success == true){
+			token = rep.data;
+			}
+			localStorage.setItem("token", JSON.stringify(token));
+			displayView();
+			window.alert(rep.Message);
+			}
 	}
-	localStorage.setItem("token", JSON.stringify(token));
-	displayView();
-	window.alert(res.message);
-	return true;
+
+	xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+	xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xmlhttp.send(null);
 
 };
 
 function logout(){
 	var tok = JSON.parse(localStorage.getItem("token"));
 	localStorage.setItem("token", null);
-	window.alert('youpi3');
-	var res = serverstub.signOut(tok);
 
-	displayView();
+	xmlhttp = new XMLHttpRequest();
+
+	var rep;
+	xmlhttp.open("POST", "/signout/" + tok, false);
+	xmlhttp.onreadystatechange=function()
+	{
+		if (xmlhttp.readyState==4 && xmlhttp.status==200)
+	    {
+	    	rep=JSON.parse(xmlhttp.responseText);
+	    	window.alert("test2");
+			displayView();
+			window.alert(rep.Message);
+			}
+	}
+
+	xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+	xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	xmlhttp.send(null);
 	return true;
 };
 
@@ -154,20 +197,65 @@ function postmess(mail)
 function reloadwall(type)
 {
 	var tok = JSON.parse(localStorage.getItem("token"));
-	var messages = serverstub.getUserMessagesByToken(tok).data;
+	var messages;
+	window.alert("test1");
 	var wall = document.getElementById('wall');
 	if (type) { 
 		wall=document.getElementById('wallb');
-		var email = JSON.parse(localStorage.getItem("usrmail"));
-		messages = serverstub.getUserMessagesByEmail(tok, email).data; 
+		xmlhttp = new XMLHttpRequest();
+		var rep;
+		xmlhttp.open("GET", "/messages/" + token, false);
+		xmlhttp.onreadystatechange=function()
+		{
+			if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		    {
+		    	rep=JSON.parse(xmlhttp.responseText);
+		    	window.alert("test2");
+				displayView();
+				messages=rep.data;
+				var wallcontent ="";
+				for (var m=0; m<messages.length; m++)
+				{
+					wallcontent += "<div><h4>"+messages[m].writer+"</h4><p>"+messages[m].content+"</p></div></br>";
+				}
+				wall.innerHTML = wallcontent;	
+				window.alert(rep.Message);
+				}
+		}
+
+		xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+		xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xmlhttp.send(null);
 
 	}
-		var wallcontent ="";
-		for (var m=0; m<messages.length; m++)
+	else
+	{
+		xmlhttp = new XMLHttpRequest();
+		var rep;
+		xmlhttp.open("GET", "/messages/" + token, false);
+		xmlhttp.onreadystatechange=function()
 		{
-			wallcontent += "<div><h4>"+messages[m].writer+"</h4><p>"+messages[m].content+"</p></div></br>";
-		};
-		wall.innerHTML = wallcontent;
+			if (xmlhttp.readyState==4 && xmlhttp.status==200)
+		    {
+		    	rep=JSON.parse(xmlhttp.responseText);
+		    	window.alert("test2");
+				displayView();
+				messages = rep.data;
+				var wallcontent ="";
+				for (var m=0; m<messages.length; m++)
+				{
+					wallcontent += "<div><h4>"+messages[m].writer+"</h4><p>"+messages[m].content+"</p></div></br>";
+				}
+				wall.innerHTML = wallcontent;
+				window.alert(rep.Message);
+				}
+		}
+
+		xmlhttp.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+		xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xmlhttp.send(null);
+	}
+	
 };
 
 
