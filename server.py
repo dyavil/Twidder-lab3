@@ -44,7 +44,6 @@ def sign_up(email, password, firstname, familyname, gender, city, country):
 @app.route('/signout/<token>', methods=['POST'])
 def sign_out(token):
 	if request.method == 'POST':
-		database_helper.sign_out(token);
 		return json.dumps({"success": True, "Message": "Log out !"})
 
 @app.route('/passchange/<token>/<old_password>/<new_password>', methods=['POST'])
@@ -100,6 +99,8 @@ def get_user_messages_by_email(token, email):
 @app.route('/postmessage/<token>/<message>/<email>', methods=['POST'])
 def post_message(token, message, email):
 	if get_user_data_by_token(token) != None:
+		message = html_escape(message)
+		print message
 		database_helper.post_message(token, message, email)
 		jsonfile = json.dumps({"success": True, "Message": "Message send"})
 	else : jsonfile = json.dumps({"success": False, "Message": "token error"})
@@ -108,6 +109,18 @@ def post_message(token, message, email):
 @app.route('/hello')
 def hello_world():
     return 'Hello Flask!'
+
+html_escape_table = {
+    "&": "&amp;",
+    '"': "&quot;",
+    "'": "&apos;",
+    ">": "&gt;",
+    "<": "&lt;",
+}
+
+def html_escape(text):
+    return "".join(html_escape_table.get(c,c) for c in text)
+
 
 
 if __name__ == '__main__':

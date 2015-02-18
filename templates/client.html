@@ -10,7 +10,6 @@
 
 		{% if token %}
 		<div id="profileview">
-			<div>logged as {{ token|tojson|safe }}</div>
 		
 		<button class="topbtn" onclick="tabdisplay(1);">Home</button>
 		<button class="topbtn" onclick="tabdisplay(2);">Browse</button>
@@ -53,7 +52,7 @@
 			<input type="text" name="familyname" id="familyname" placeholder="Family name" required="true">
 			<select id="gender" required="true">
 				<option value="male">male</option>
-				<option value="male">female</option>
+				<option value="female">female</option>
 			</select>
 			<input type="text" name="city" id="city" placeholder="City" required="true">
 			<input type="text" name="country" id="country" placeholder="Country" required="true">
@@ -63,9 +62,9 @@
 
 		</script>
 		<script type="text/view" id="logview">
-
-		<div>logged in !!!</div>
 		
+		<h2 style="text-align: center;">Twidder</h2>
+
 		<button class="topbtn" onclick="tabdisplay(1);">Home</button>
 		<button class="topbtn" onclick="tabdisplay(2);">Browse</button>
 		<button class="topbtn" onclick="tabdisplay(3);">Account</button>
@@ -74,7 +73,7 @@
 			
 				<div id="userinfo"></div>
 				<form onsubmit="postmess(); return false;" id="postmess">
-					<textarea id="newmess" required="true" rows="4" cols="50"placeholder="message"></textarea>
+					<textarea id="newmess" required="true" rows="4" cols="50"placeholder="Write on the wall"></textarea>
 					<input type="submit">
 				</form>
 				<div id='wall'></div>
@@ -84,7 +83,7 @@
 
 			<div id="browse">
 
-				<form id="finduser" onsubmit="return false;">
+				<form id="finduser" onsubmit="finduser(); return false;">
 					<input id="usermail" type="email" required="true" placeholder="email">
 					<input type="button" value="Find" onclick="finduser();">
 				</form>
@@ -105,7 +104,7 @@
 				<form id="cgpass" onsubmit="changepass(); return false;">
 					<input type="password" id="oldpwd" required="true" placeholder="old password">
 					<input type="password" id="newpwd" required="true" placeholder="new password">
-					<input type="submit">
+					<input type="submit" value="Change">
 				</form>
 				<button onclick="logout();">LogOut</button>
 

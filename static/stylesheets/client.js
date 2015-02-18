@@ -46,8 +46,9 @@ function signup(){
 	    {
 	    	rep=JSON.parse(xmlhttp.responseText);
 	    	//window.alert("test2");
+	    	signin(document.getElementById('email').value, pass1);
 			displayView();
-			window.alert(rep.Message);
+			//window.alert(rep.Message);
 			}
 	}
 
@@ -58,8 +59,13 @@ function signup(){
 
 };
 
-function signin(){
+function signin(email, password){
 	var pass = document.getElementById('sipassword').value;
+	var logmail = document.getElementById('siemail').value;
+	if (email) {
+		logmail = email;
+		pass=password;
+	}
 
 	if (pass.length < 8){
 		window.alert('password too short (min 8)');
@@ -69,7 +75,7 @@ function signin(){
 	xmlhttp = new XMLHttpRequest();
 	//window.alert("test");
 	var rep;
-	xmlhttp.open("POST", "/signin/" + document.getElementById('siemail').value + "/" + pass, false);
+	xmlhttp.open("POST", "/signin/" + logmail + "/" + pass, false);
 	xmlhttp.onreadystatechange=function()
 	{
 		if (xmlhttp.readyState==4 && xmlhttp.status==200)
@@ -82,7 +88,7 @@ function signin(){
 			}
 			localStorage.setItem("token", JSON.stringify(token));
 			displayView();
-			window.alert(rep.Message);
+			//window.alert(rep.Message);
 			}
 	}
 
@@ -125,7 +131,6 @@ function tabdisplay(id){
 			document.getElementById('browse').style.display ='none';
 			document.getElementById('account').style.display ='none';
 			var tok = JSON.parse(localStorage.getItem("token"));
-			userinfo();
 			reloadwall();
 
 			document.getElementById('home').style.display='block';
@@ -199,6 +204,8 @@ function postmess(mail)
 
 		xmlhttp = new XMLHttpRequest();
 		var rep;
+		content = escapeHtml(content);
+		window.alert(content);
 		xmlhttp.open("POST", "/postmessage/" + tok + "/" + content + "/" + email, false);
 		xmlhttp.onreadystatechange=function()
 		{
@@ -206,7 +213,14 @@ function postmess(mail)
 		    {
 		    	rep=JSON.parse(xmlhttp.responseText);
 				window.alert(rep.Message);
-				if (mail) { reloadwall(1); };
+				if (mail) { 
+					document.getElementById('newmessonwall').value = "";
+					reloadwall(1); 
+				}
+				else{
+					document.getElementById('newmess').value = "";
+					reloadwall();
+				}
 			}
 		}
 
@@ -234,16 +248,21 @@ function reloadwall(type)
 			if (xmlhttp.readyState==4 && xmlhttp.status==200)
 		    {
 		    	rep=JSON.parse(xmlhttp.responseText);
-		    	messages = rep.Data;
-				messparse = JSON.parse(messages);
-				var wallcontent ="";
-				for (var m=0; m<messparse.length; m++)
-				{
-					wallcontent += "<div><h4>"+messparse[m].writer+"</h4><p>"+messparse[m].content+"</p></div></br>";
+		    	if(rep.success){
+			    	messages = rep.Data;
+					messparse = JSON.parse(messages);
+					var wallcontent ="";
+					for (var m=0; m<messparse.length; m++)
+					{
+						wallcontent += "<div><h4>"+messparse[m].writer+"</h4><p>"+messparse[m].content+"</p></div></br>";
+					}
+					//window.alert(messparse.length);
+					wall.innerHTML = wallcontent;
 				}
-				//window.alert(messparse.length);
-				wall.innerHTML = wallcontent;	
-				window.alert(rep.Message);
+				else {
+
+				}
+				//window.alert(rep.Message);
 				userinfo(email);
 				}
 		}
@@ -263,16 +282,18 @@ function reloadwall(type)
 			if (xmlhttp.readyState==4 && xmlhttp.status==200)
 		    {
 		    	rep=JSON.parse(xmlhttp.responseText);
-				messages = rep.Data;
-				messparse = JSON.parse(messages);
-				var wallcontent ="";
-				for (var m=0; m<messparse.length; m++)
-				{
-					wallcontent += "<div><h4>"+messparse[m].writer+"</h4><p>"+messparse[m].content+"</p></div></br>";
+		    	if(rep.success){
+					messages = rep.Data;
+					messparse = JSON.parse(messages);
+					var wallcontent ="";
+					for (var m=0; m<messparse.length; m++)
+					{
+						wallcontent += "<div><h4>"+messparse[m].writer+"</h4><p>"+messparse[m].content+"</p></div></br>";
+					}
+					//window.alert(messparse.length);
+					wall.innerHTML = wallcontent;
 				}
-				//window.alert(messparse.length);
-				wall.innerHTML = wallcontent;
-				window.alert(rep.Message);
+				//window.alert(rep.Message);
 				userinfo();
 				}
 		}
@@ -282,6 +303,12 @@ function reloadwall(type)
 		xmlhttp.send(null);
 	}
 	return false;
+};
+
+function escapeHtml(text) {
+  return text
+      .replace(/#/g, "-")
+      .replace(/\//g, "-");
 };
 
 
@@ -303,10 +330,13 @@ function userinfo(mail)
 	var tok = JSON.parse(localStorage.getItem("token"));
 	var req ="";
 	var usrinf = document.getElementById('userinfo');
+	var wall = document.getElementById('wall');
 	if (mail) 
 	{
 		req = ("/userdataemail/" + tok + "/" + mail);
 		usrinf = document.getElementById('userwallinfo');
+		wall = document.getElementById('showwall');
+
 
 	}
 	else {
@@ -321,11 +351,19 @@ function userinfo(mail)
 			if (xmlhttp.readyState==4 && xmlhttp.status==200)
 		    {
 		    	rep=JSON.parse(xmlhttp.responseText);
-		    	userdata = rep.Data;
+				if (!rep.success) {
+					wall.style.display ='none';
+					//usrinf.innerHTML = "";
+				}
+				else{
+				userdata = rep.Data;
 				userparse = JSON.parse(userdata);
+				var gender = "F";
+				if (userparse.gender == 0) { gender = "M" };
 
-				usrinf.innerHTML = "<div>Email : "+userparse.email+"</div><b>Firstname : "+userparse.firstname+"</b><div>Familyname : "+userparse.familyname+"</div><div>Gender : "+userparse.gender+"</div><div>City : "+userparse.city+"</div><div>Country : "+userparse.country+"</div>";
+				usrinf.innerHTML = "<div><b>Email : </b>"+userparse.email+"</div><b>Firstname : </b>"+userparse.firstname+"<div><b>Familyname : </b>"+userparse.familyname+"</div><div><b>Gender : </b>"+gender+"</div><div><b>City : </b>"+userparse.city+"</div><div><b>Country : </b>"+userparse.country+"</div>";
 			
+				}
 				window.alert(rep.Message);
 			}
 		}

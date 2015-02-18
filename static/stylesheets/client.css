@@ -1,5 +1,6 @@
 #sign-in{
 	display: block;
+	box-sizing: border-box;
 	width: 100%;
 	height: 100px;
 	background-color:white;
@@ -7,6 +8,7 @@
 
 #sign-up{
 	display: block;
+	box-sizing: border-box;
 	width: 100%;
 	height: 280px;
 	background-color: white;
@@ -14,22 +16,37 @@
 
 #sign-up input, select{
 	display: block;
+	box-sizing: border-box;
+
 	margin: 0 auto;
 	width: 80%;
 }
 
 #sign-in input{
 	display: block;
+	box-sizing: border-box;
 	margin: 0 auto;
 	width: 80%;
 }
 
 #right{
 	display: inline-block;
+	box-sizing: border-box;
 	width: 250px;
 	float: right;
 	height: 400px;
 	margin-left: 10px;
+}
+
+button{
+	color: #ff8300;
+	background-color: #ffffff;
+	border: none;
+}
+
+button:hover{
+	color: white;
+	background-color: #C56500;
 }
 
 #right h3{
@@ -39,21 +56,25 @@
 
 body{
 	display: block;
+	box-sizing: border-box;
 	width: 600px;
 	height: 400px;
 	margin: 0 auto;
+	font-family: Helvetica;
 	margin-top: 100px;
-	background-color: #FFAA7F;
+	background-color: #FF8205;
 }
 
 #left{
 	display: inline-block;
+	box-sizing: border-box;
 	margin: 0 0;
 	width: 340px;
 }
 
 #left img {
 	display: block;
+	box-sizing: border-box;
 	height: 400px;
 	width: auto;
 }
@@ -61,6 +82,7 @@ body{
 
 .topbtn{
 	display: inline-block;
+	box-sizing: border-box;
 	width: 30%;
 	margin-right: 5px;
 	margin-left: 5px;
@@ -69,8 +91,10 @@ body{
 
 #wall, #wallb{
 	display: block;
+	box-sizing: border-box;
 	margin: 0 auto;
 	width: 80%;
+	min-width: 480px;
 	font-family: Helvetica;
 }
 
@@ -78,19 +102,37 @@ body{
 	display: block;
 	margin: 0 auto;
 	width: 100%;
+	min-width: 480px;
 	padding: 5px;
 	border: dotted 1px black;
-	background-color: #FFD9C5;
+	background-color: white;
 }
 
 #wall div h4, #wallb div h4{
+	display: block;
+	box-sizing: border-box;
 	color: gray;
+	border-bottom: dashed 1px gray;
 	margin: 0;
+	width: 100%;
+	min-width: 480px;
 	padding: 0;
+}
+
+#wall div p, #wallb div p{
+	display: block;
+	box-sizing: border-box;
+	padding-left: 5px;
+	padding-right: 5px;
+	width: 100%;
+	word-wrap: break-word;
+	min-width: 480px;
+	max-width: 100%;
 }
 
 #home, #browse, #account{
 	display: block;
+	box-sizing: border-box;
 	margin: 0 auto;
 	width: 100%;
 }
@@ -98,7 +140,7 @@ body{
 #userinfo, #userwallinfo{
 	display: block;
 	margin: 0 auto;
-	width: 50%;
+	width: 60%;
 	margin-top: 10px;
 	margin-bottom: 10px;
 }
@@ -131,4 +173,28 @@ body{
 	display: block;
 	text-align: center;
 	margin: 0 auto;
+}
+
+#cgpass{
+	display: block;
+	margin: 0 auto;
+	height: 3em;
+	margin-top: 20px;
+}
+
+#cgpass input{
+	display: inline-block;
+	width: 30%;
+}
+
+#account button{
+	display: block;
+	margin: 0 auto;
+	padding: 0;
+	width: 20%;
+	min-width: 80px;
+	height: 2em;
+	line-height: 2em;
+	font-size: 0.8em;
+
 }
