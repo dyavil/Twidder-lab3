@@ -38,9 +38,10 @@
 		</div>
 		<div id="right">
 		<form onsubmit="signin(); return false;" name="sign-in" id="sign-in">
+		<h3>Sign in</h3>
 			<input type="email" id="siemail" placeholder="Email" autofocus="true">
 			<input type="password" id="sipassword" placeholder="Password">
-			<input type="submit">
+			<input type="submit" value="Sign-in">
 
 		</form>
 		<form onsubmit="signup(); return false;" name="sign-up" id="sign-up">
@@ -56,14 +57,14 @@
 			</select>
 			<input type="text" name="city" id="city" placeholder="City" required="true">
 			<input type="text" name="country" id="country" placeholder="Country" required="true">
-			<input type="submit">
+			<input type="submit" value="Sign-up">
 		</form>
 		</div>
 
 		</script>
 		<script type="text/view" id="logview">
 		
-		<h2 style="text-align: center;">Twidder</h2>
+		<h2 style="text-align: center;">Tweeder</h2>
 
 		<button class="topbtn" onclick="tabdisplay(1);">Home</button>
 		<button class="topbtn" onclick="tabdisplay(2);">Browse</button>
@@ -74,33 +75,36 @@
 				<div id="userinfo"></div>
 				<form onsubmit="postmess(); return false;" id="postmess">
 					<textarea id="newmess" required="true" rows="4" cols="50"placeholder="Write on the wall"></textarea>
-					<input type="submit">
+					<input type="submit" value="Tweed !">
 				</form>
+				<button class="reload" onclick="reloadwall();">Update the thread</button>
 				<div id='wall'></div>
-				<button class="reload" onclick="reloadwall();">Reload</button>
 
 			</div>
 
 			<div id="browse">
-
+				<h5 style="text-align: center;">Enter the email address of the user to find</h5>
 				<form id="finduser" onsubmit="finduser(); return false;">
 					<input id="usermail" type="email" required="true" placeholder="email">
 					<input type="button" value="Find" onclick="finduser();">
 				</form>
 				<div id="showwall">
+
 				<form onsubmit="return false;" id="postmess">
 					<textarea id="newmessonwall" required="true" rows="4" cols="50" placeholder="message"></textarea>
-					<input type="button" value="Post" onclick="postmess(1);">
+					<input type="button" value="Tweed !" onclick="postmess(1);">
 				</form>
+				<button class="reload" onclick="reloadwall(1); return false;">Update the thread</button>
 				<div id='userwallinfo'></div>
 				<div id='wallb'></div>
-				<button class="reload" onclick="reloadwall(1); return false;">Reload</button>
+				
 				</div>
 
 			</div>
 
 			<div id="account">
 
+				<h5 style="text-align: center;">You can change your password here</h5>
 				<form id="cgpass" onsubmit="changepass(); return false;">
 					<input type="password" id="oldpwd" required="true" placeholder="old password">
 					<input type="password" id="newpwd" required="true" placeholder="new password">
