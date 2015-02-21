@@ -60,7 +60,7 @@
 			<input type="submit" value="Sign-up">
 		</form>
 		</div>
-
+		<div id=logfailed>Wrong password/username</div>
 		</script>
 		<script type="text/view" id="logview">
 		
@@ -94,8 +94,9 @@
 					<textarea id="newmessonwall" required="true" rows="4" cols="50" placeholder="message"></textarea>
 					<input type="button" value="Tweed !" onclick="postmess(1);">
 				</form>
-				<button class="reload" onclick="reloadwall(1); return false;">Update the thread</button>
+				
 				<div id='userwallinfo'></div>
+				<button class="reload" onclick="reloadwall(1); return false;">Update the thread</button>
 				<div id='wallb'></div>
 				
 				</div>

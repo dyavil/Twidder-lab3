@@ -11,11 +11,6 @@ def get_db():
 		db = g.db = connect_db()
 	return db
 
-def add_user(email, password, firstname, familyname, gender, city, country):
-	c = get_db()
-	c.execute("INSERT INTO users (email, password, firstname, familyname, gender, city, country, token) values(?, ?, ?, ?, ?, ?, ?)", (email, password, firstname, familyname, gender, city, country, ""))
-	c.commit()
-
 
 def get_user(email, password, token):
 	c = get_db()
@@ -67,10 +62,10 @@ def get_user_messages(token):
 	useremail = cursor.fetchone()
 	useremail = useremail[0]
 	print useremail
-	cursor.execute("SELECT * FROM messages WHERE writer = ? OR receiver = ? ORDER BY id DESC", (useremail, useremail))
+	cursor.execute("SELECT * FROM messages WHERE receiver = ? ORDER BY id DESC", (useremail, ))
 	result = [dict(writer=row[1], content=row[2], receiver=row[3]) for row in cursor.fetchall()]
 	
-	if (cursor.execute("SELECT Count(*) FROM messages WHERE writer = ? OR receiver = ?", (useremail, useremail)).fetchone()[0]) <= 0:
+	if (cursor.execute("SELECT Count(*) FROM messages WHERE receiver = ?", (useremail, )).fetchone()[0]) <= 0:
 		cursor.close()
 		print "bla"
 		return None
@@ -80,9 +75,9 @@ def get_user_messages(token):
 def get_user_messages_email(email):
 	c = get_db()
 	cursor=c.cursor()
-	cursor.execute("SELECT * FROM messages WHERE writer = ? OR receiver = ? ORDER BY id DESC", (email, email))
+	cursor.execute("SELECT * FROM messages WHERE receiver = ? ORDER BY id DESC", (email, ))
 	result = [dict(writer=row[1], content=row[2], receiver=row[3]) for row in cursor.fetchall()]
-	if cursor.execute("SELECT Count(*) FROM messages WHERE writer = ? OR receiver = ?", (email, email)).fetchone()[0] <= 0:
+	if cursor.execute("SELECT Count(*) FROM messages WHERE receiver = ?", (email, )).fetchone()[0] <= 0:
 		cursor.close()
 		print "bla"
 		return None
@@ -121,6 +116,8 @@ def post_message(token, message, email):
 	cursor=c.cursor()
 	cursor.execute("SELECT email FROM users WHERE token = ?", (token, ))
 	useremail = cursor.fetchone()
+	if email == "himself":
+		email = useremail[0]
 	print useremail
 	cursor.execute("INSERT INTO messages (writer, content, receiver) VALUES (?, ?, ?)", (useremail[0], message, email))
 	c.commit()

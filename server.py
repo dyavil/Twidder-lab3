@@ -14,8 +14,11 @@ app = Flask(__name__)
 def home():
 	return render_template('client.html')
 
-@app.route('/signin/<email>/<password>', methods=['POST'])
-def sign_in(email, password):
+@app.route('/signin', methods=['POST'])
+def sign_in():	
+	email = request.form['email']
+	password = request.form['password']
+
 	token = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40))
 	print password
 	m = hashlib.md5()
@@ -24,11 +27,21 @@ def sign_in(email, password):
 	pwd = m.hexdigest()
 	result = database_helper.get_user(email, pwd, token)
 	jsonfile = json.dumps({"success": True, "Message": "Log in", "data": token})
+	if result == None:
+		jsonfile = json.dumps({"success": False, "Message": "Wrong username/password"})
 	return jsonfile
 
 
-@app.route('/signup/<email>/<password>/<firstname>/<familyname>/<gender>/<city>/<country>', methods=['POST'])
-def sign_up(email, password, firstname, familyname, gender, city, country):
+@app.route('/signup', methods=['POST'])
+def sign_up():
+	email = request.form['email']
+	password = request.form['password']
+	firstname = request.form['firstname']
+	familyname = request.form['familyname']
+	gender = request.form['gender']
+	city = request.form['city']
+	country = request.form['country']
+
 	if request.method == 'POST':
 		if database_helper.get_user_info_email(email) == None:
 			token = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(40))
@@ -43,21 +56,23 @@ def sign_up(email, password, firstname, familyname, gender, city, country):
 
 @app.route('/signout/<token>', methods=['POST'])
 def sign_out(token):
-	if request.method == 'POST':
-		return json.dumps({"success": True, "Message": "Log out !"})
+	return json.dumps({"success": True, "Message": "Log out !"})
 
-@app.route('/passchange/<token>/<old_password>/<new_password>', methods=['POST'])
-def change_password(token, old_password, new_password):
-	if request.method == 'POST':
-		m = hashlib.md5()
-		m2 = hashlib.md5()
-		m.update(old_password)
-		pwd1 = m.hexdigest()
-		m2.update(new_password)
-		pwd2 = m2.hexdigest()
-		database_helper.change_password(token, pwd1, pwd2)
-		jsonfile = json.dumps({"success": True, "Message": "Password changed"})
-		return jsonfile
+@app.route('/passchange', methods=['POST'])
+def change_password():
+	token = request.form['token']
+	old_password = request.form['oldpass']
+	new_password = request.form['newpass']
+
+	m = hashlib.md5()
+	m2 = hashlib.md5()
+	m.update(old_password)
+	pwd1 = m.hexdigest()
+	m2.update(new_password)
+	pwd2 = m2.hexdigest()
+	database_helper.change_password(token, pwd1, pwd2)
+	jsonfile = json.dumps({"success": True, "Message": "Password changed"})
+	return jsonfile
 
 
 @app.route('/userdatatoken/<token>', methods=['GET'])
@@ -78,15 +93,17 @@ def get_user_data_by_email(token, email):
 	else : jsonfile = json.dumps({"success": False, "Message": "Token error"})
 	return jsonfile
 
-@app.route('/messages/<token>')
-def get_user_messages_by_token(token):
+@app.route('/messages')
+def get_user_messages_by_token(token = ""):
+	token = request.args.get('token')
 	messages = database_helper.get_user_messages(token)
 	if messages != None:
 		jsonfile = json.dumps({"success": True, "Message": "messages found", "Data": messages})
 	else : jsonfile = json.dumps({"success": False, "Message": "no messages"})
 	return jsonfile
 
-@app.route('/messages/<token>/<email>')
+#get the message list of the user corresponding to the email
+@app.route('/messages/<token>/<email>', methods=['GET'])
 def get_user_messages_by_email(token, email):
 	if get_user_data_by_token(token) != None:
 		messages = database_helper.get_user_messages_email(email)
@@ -96,8 +113,12 @@ def get_user_messages_by_email(token, email):
 	else : jsonfile = json.dumps({"success": False, "Message": "token error"})
 	return jsonfile
 
-@app.route('/postmessage/<token>/<message>/<email>', methods=['POST'])
-def post_message(token, message, email):
+#post message method
+@app.route('/postmessage', methods=['POST'])
+def post_message(email = "himself"):
+	token = request.form['token']
+	message = request.form['message']
+	email = request.form['email']
 	if get_user_data_by_token(token) != None:
 		message = html_escape(message)
 		print message
